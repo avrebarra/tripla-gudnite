@@ -7,11 +7,22 @@ class UserFollowingService
     followed = User.find_by(id: followed_id)
     return error("User not found") if followed.nil?
 
-    following = @user.followings.build(followed: followed)
-    if following.save
-      { success: true, following: following }
+    existing = @user.followings.find_by(followed_id: followed.id)
+    if existing
+      { success: true, following: existing }
     else
-      error(following.errors.full_messages)
+      following = @user.followings.build(followed: followed)
+      if following.save
+        { success: true, following: following }
+      else
+        # If the only error is already followed, treat as success
+        if following.errors.details[:follower_id].any? { |e| e[:error] == :taken }
+          existing = @user.followings.find_by(followed_id: followed.id)
+          { success: true, following: existing }
+        else
+          error(following.errors.full_messages)
+        end
+      end
     end
   end
 
