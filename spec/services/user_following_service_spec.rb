@@ -60,4 +60,22 @@ describe UserFollowingService do
       end
     end
   end
+
+  describe '#list_followings' do
+    it 'returns users the authenticated user is following' do
+      user2 = User.create!(name: 'Another', email: 'another@example.com', password: 'password')
+      user3 = User.create!(name: 'Third', email: 'third@example.com', password: 'password')
+      user.followings.create!(followed: target)
+      user.followings.create!(followed: user2)
+      result = subject.list_followings
+      expect(result.map(&:id)).to contain_exactly(target.id, user2.id)
+      expect(result.map(&:name)).to include('Target', 'Another')
+      expect(result.map(&:email)).to include('target@example.com', 'another@example.com')
+      expect(result.map(&:id)).not_to include(user3.id)
+    end
+
+    it 'returns empty array if user is not following anyone' do
+      expect(subject.list_followings).to eq([])
+    end
+  end
 end

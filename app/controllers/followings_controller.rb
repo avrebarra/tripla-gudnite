@@ -1,6 +1,13 @@
 class FollowingsController < ApplicationController
   before_action :authenticate_user!
 
+  # GET /followings
+  def index
+    service = UserFollowingService.new(current_user)
+    users = service.list_followings
+    render json: users
+  end
+
   # POST /followings
   def create
     service = UserFollowingService.new(current_user)

@@ -37,6 +37,31 @@ describe 'Followings API' do
         run_test!
       end
     end
+
+    get 'List users the authenticated user is following' do
+      tags 'Social Connections'
+      produces 'application/json'
+      security [ bearerAuth: [] ]
+      parameter name: :Authorization, in: :header, type: :string, required: true, description: 'Bearer token'
+
+      response '200', 'list of followed users' do
+        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+        let!(:target1) { User.create!(name: 'Target1', email: 'target1@example.com', password: 'password') }
+        let!(:target2) { User.create!(name: 'Target2', email: 'target2@example.com', password: 'password') }
+        before do
+          user.followings.create!(followed: target1)
+          user.followings.create!(followed: target2)
+        end
+        let(:Authorization) { "Bearer #{user.token}" }
+        run_test!
+      end
+
+      response '200', 'empty list if not following anyone' do
+        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+        let(:Authorization) { "Bearer #{user.token}" }
+        run_test!
+      end
+    end
   end
 
   path '/followings/{id}' do
