@@ -38,4 +38,29 @@ describe 'Followings API' do
       end
     end
   end
+
+  path '/followings/{id}' do
+    delete 'Unfollow a user' do
+      tags 'Social Connections'
+      security [ bearerAuth: [] ]
+      parameter name: :Authorization, in: :header, type: :string, required: true, description: 'Bearer token'
+      parameter name: :id, in: :path, type: :integer, required: true, description: 'Following ID'
+
+      response '204', 'unfollow successful' do
+        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+        let!(:target) { User.create!(name: 'Target', email: 'target@example.com', password: 'password') }
+        let!(:following) { user.followings.create!(followed: target) }
+        let(:Authorization) { "Bearer #{user.token}" }
+        let(:id) { following.id }
+        run_test!
+      end
+
+      response '404', 'following not found' do
+        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+        let(:Authorization) { "Bearer #{user.token}" }
+        let(:id) { 0 }
+        run_test!
+      end
+    end
+  end
 end

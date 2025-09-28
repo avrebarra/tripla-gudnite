@@ -14,5 +14,5 @@ Rails.application.routes.draw do
   post "login", to: "auth#login"
   delete "logout", to: "auth#logout"
 
-  resources :followings, only: [ :create ]
+  resources :followings, only: [ :create, :destroy ]
 end

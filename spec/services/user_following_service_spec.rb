@@ -41,4 +41,23 @@ describe UserFollowingService do
       end
     end
   end
+
+  describe '#unfollow' do
+    context 'when unfollowing an existing following' do
+      it 'removes the following and returns success' do
+        following = user.followings.create!(followed: target)
+        result = subject.unfollow(following.id)
+        expect(result[:success]).to be true
+        expect(user.followings.find_by(id: following.id)).to be_nil
+      end
+    end
+
+    context 'when unfollowing a non-existent following' do
+      it 'returns error' do
+        result = subject.unfollow(0)
+        expect(result[:success]).to be false
+        expect(result[:error]).to match(/not found/i)
+      end
+    end
+  end
 end

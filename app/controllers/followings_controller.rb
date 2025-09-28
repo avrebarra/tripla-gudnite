@@ -15,4 +15,15 @@ class FollowingsController < ApplicationController
       end
     end
   end
+
+  # DELETE /followings/:id
+  def destroy
+    service = UserFollowingService.new(current_user)
+    result = service.unfollow(params[:id])
+    if result[:success]
+      head :no_content
+    else
+      render json: { error: result[:error] }, status: :not_found
+    end
+  end
 end

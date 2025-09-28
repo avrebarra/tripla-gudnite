@@ -26,6 +26,14 @@ class UserFollowingService
     end
   end
 
+
+  def unfollow(following_id)
+    following = @user.followings.find_by(id: following_id)
+    return error("Following not found") unless following
+    following.destroy
+    { success: true }
+  end
+
   private
 
   def error(message)
