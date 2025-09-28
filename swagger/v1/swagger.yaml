@@ -1,0 +1,57 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/sleep_records/clock_in":
+    post:
+      summary: Clock in (start a new sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: clocked in
+        '422':
+          description: already clocked in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+  "/sleep_records/clock_out":
+    post:
+      summary: Clock out (end the current sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: clocked out
+        '422':
+          description: no open sleep session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com

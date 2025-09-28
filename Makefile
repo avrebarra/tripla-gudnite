@@ -10,8 +10,8 @@ start:
 migrate:
 	bundle exec rails db:migrate
 
-generate-rswag:
-	bundle exec rails generate rswag:install
+generate-apidoc:
+	bundle exec rake rswag:specs:swaggerize
 
 test:
 	bundle exec rspec
