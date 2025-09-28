@@ -9,4 +9,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  post 'sleep_records/clock_in', to: 'sleep_records#clock_in'
 end
