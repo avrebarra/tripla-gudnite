@@ -45,6 +45,37 @@ paths:
       responses:
         '204':
           description: logout successful
+  "/followings":
+    post:
+      summary: Follow another user
+      tags:
+      - Social Connections
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      responses:
+        '201':
+          description: follow successful
+        '404':
+          description: user not found
+        '422':
+          description: invalid follow (self-follow or other validation)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                followed_id:
+                  type: integer
+              required:
+              - followed_id
   "/sleep_records/clock_in":
     post:
       summary: Clock in (start a new sleep session)
