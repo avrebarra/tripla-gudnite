@@ -1,0 +1,48 @@
+{
+    "name": "Tripla Gudnite Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/ruby:3.2-bullseye",
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+    ],
+    "forwardPorts": [
+        3000,
+        35729,
+        5173
+    ],
+    "onCreateCommand": "bash .devcontainer/bootstrap.sh",
+    "postCreateCommand": "bash .devcontainer/post_create.sh",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Shopify.ruby-lsp",
+                "ms-vscode.vscode-json",
+                "bradlc.vscode-tailwindcss",
+                "formulahendry.auto-rename-tag",
+                "rubocop.vscode-rubocop"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "ruby.lsp.enabledFeatures": {
+                    "codeActions": true,
+                    "diagnostics": true,
+                    "documentHighlights": true,
+                    "documentLink": true,
+                    "documentSymbols": true,
+                    "foldingRanges": true,
+                    "formatting": true,
+                    "hover": true,
+                    "inlayHints": true,
+                    "onTypeFormatting": true,
+                    "selectionRanges": true,
+                    "semanticHighlighting": true,
+                    "completion": true
+                }
+            }
+        }
+    },
+    "remoteUser": "vscode"
+}
