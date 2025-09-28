@@ -9,6 +9,16 @@ class SleepRecordsController < ApplicationController
     end
   end
 
+  # POST /sleep_records/clock_out
+  def clock_out
+    result = SleepRecordService.new(current_user).clock_out
+    if result[:success]
+      render json: result[:sleep_record], status: :ok
+    else
+      render json: { error: result[:error] }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def current_user

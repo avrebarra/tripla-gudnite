@@ -14,6 +14,19 @@ class SleepRecordService
     end
   end
 
+  def clock_out
+    open_record = @user.sleep_records.where(clock_out: nil).order(:created_at).last
+    return error("No open sleep session to clock out.") unless open_record
+
+    open_record.clock_out = Time.current
+    open_record.duration = open_record.clock_out - open_record.clock_in if open_record.clock_in && open_record.clock_out
+    if open_record.save
+      { success: true, sleep_record: open_record }
+    else
+      error(open_record.errors.full_messages)
+    end
+  end
+
   private
 
   def error(message)
