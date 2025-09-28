@@ -197,21 +197,44 @@ follow-service-->>api-controller: JSON {status:ok}
 deactivate follow-service
 end
 
-group 3. Friends’ Sleep Records
+group 3. Friends’ Sleep Records (JOIN query)
 api-controller->friends-service: get friends sleep records\nGET /friends/sleep_records
 activate friends-service
-friends-service->follow-model: find_all_followed_ids(user_id)
-activate follow-model
-follow-model-->>friends-service: [followed_ids]
-deactivate follow-model
-friends-service->sleeprecord-model: find_all_by_users([followed_ids])\nWHERE created_at IN last_week\nORDER BY (wake_time-sleep_time) DESC
+
+friends-service->sleeprecord-model: find_all_by_following(user_id)\nJOIN follows f ON f.followed_id = sleep_records.user_id\nWHERE f.follower_id = user_id\nAND created_at IN last_week\nORDER BY (wake_time-sleep_time) DESC
 activate sleeprecord-model
-note right of sleeprecord-model: Sorting by duration handled at DB\n(use index + computed column if needed)
+note right of sleeprecord-model: Single query with JOIN\nEfficient even with thousands of follows
 sleeprecord-model-->>friends-service: [friends_sleep_records]
 deactivate sleeprecord-model
+
 friends-service-->>api-controller: JSON [friends_sleep_records]
 deactivate friends-service
 end
+
+```
+
+---
+
+**Query Plan Note:**
+
+The friends’ sleep records API uses a single JOIN query for efficiency:
+
+```sql
+SELECT sr.*
+FROM sleep_records sr
+JOIN follows f ON f.followed_id = sr.user_id
+WHERE f.follower_id = :current_user_id
+   AND sr.created_at BETWEEN :last_week_start AND :last_week_end
+ORDER BY (sr.wake_time - sr.sleep_time) DESC;
+```
+
+In Rails ActiveRecord:
+
+```ruby
+SleepRecord.joins("JOIN follows f ON f.followed_id = sleep_records.user_id")
+                .where(f: { follower_id: current_user.id })
+                .where(created_at: 1.week.ago..Time.current)
+                .order(Arel.sql("wake_time - sleep_time DESC"))
 ```
 
 ### Data Models
