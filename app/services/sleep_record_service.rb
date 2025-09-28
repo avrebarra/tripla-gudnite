@@ -27,6 +27,16 @@ class SleepRecordService
     end
   end
 
+
+  # Returns previous week's sleep records from users the current user follows, sorted by duration (longest first)
+  def self.friends_sleep_feed(user)
+    SleepRecord.joins("JOIN followings f ON f.followed_id = sleep_records.user_id")
+      .where(f: { follower_id: user.id })
+      .where.not(clock_in: nil, clock_out: nil)
+      .where(clock_in: 1.week.ago..Time.current)
+      .order(duration: :desc)
+  end
+
   private
 
   def error(message)
