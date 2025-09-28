@@ -1,4 +1,6 @@
 class AuthController < ApplicationController
+  skip_authentication :login
+
   # POST /login
   def login
     user = User.find_by(email: params[:email])
