@@ -9,7 +9,7 @@
         "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
     ],
     "forwardPorts": [
-        3000,
+        4994,
         35729,
         5173
     ],
