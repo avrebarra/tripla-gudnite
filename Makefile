@@ -1,7 +1,8 @@
 # Minimal Makefile for Rails Development
 
 
-.PHONY: start migrate create-migration generate-rswag test lint
+
+.PHONY: start migrate create-migration generate-rswag test lint seed
 
 start:
 	bundle exec rails server
@@ -17,3 +18,6 @@ test:
 
 lint:
 	bundle exec rubocop -A
+
+seed:
+	bundle exec rails db:seed
