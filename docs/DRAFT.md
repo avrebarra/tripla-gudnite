@@ -81,8 +81,138 @@ These components work together to deliver the required features, ensuring clear 
 
 ### Interactions and Data Journey Breakdown
 
-will explain the apis that wil be used to implement the features.
-will explain the interactions using sequence diagrams.
+#### Planned API Endpoints
+
+**Sleep Tracking**
+
+- `POST /sleep_records/clock_in` — Clock in (start a new sleep session)
+- `POST /sleep_records/clock_out` — Clock out (end the current sleep session, precalculate duration)
+- `GET /sleep_records` — List all sleep records for the authenticated user
+
+**Social Connections**
+
+- `POST /followings` — Follow another user
+- `DELETE /followings/:id` — Unfollow a user
+- `GET /followings` — List users the authenticated user is following
+
+**Friends’ Sleep Feed**
+
+- `GET /friends/sleep_feed` — Get previous week’s sleep records from followed users, sorted by duration
+
+**Authentication**
+
+- Token-based authentication required for all endpoints
+
+Each endpoint is designed to be RESTful, stateless, and returns JSON responses. Endpoints are versioned and documented using Swagger (rswag).
+
+#### Unified Sequence Diagram for All Main Flows
+
+```
+participant api-controller
+participant auth-service
+participant clockin-service
+participant follow-service
+participant friends-service
+participant user-model
+participant sleeprecord-model
+participant follow-model
+
+entryspacing 0.5
+
+group 0. User Auth (Login/Logout)
+api-controller->auth-service: login\nPOST /login\n--data:email,password--
+activate auth-service
+auth-service->user-model: find_by(email)
+activate user-model
+user-model-->>auth-service: user | nil
+deactivate user-model
+auth-service->auth-service: user.authenticate(password)?
+alt success
+   auth-service->user-model: update(token: SecureRandom.hex)
+   activate user-model
+   user-model-->>auth-service: user_with_token
+   deactivate user-model
+   auth-service-->>api-controller: JSON {token}
+else failure
+   auth-service-->>api-controller: JSON {error:Invalid login}, 401
+end
+deactivate auth-service
+end
+
+api-controller->auth-service: logout\nDELETE /logout\n--header:Authorization:Bearer token--
+activate auth-service
+auth-service->user-model: find_by(token)
+activate user-model
+user-model-->>auth-service: user
+deactivate user-model
+auth-service->user-model: update(token:nil)
+activate user-model
+user-model-->>auth-service: user
+deactivate user-model
+auth-service-->>api-controller: 204 No Content
+deactivate auth-service
+end
+
+group 1a. Start Sleep Session (Clock In)
+api-controller->clockin-service: start session\nPOST /sleep_sessions/start\n--data:sleep_time--
+activate clockin-service
+clockin-service->sleeprecord-model: create(user_id, sleep_time)
+activate sleeprecord-model
+sleeprecord-model-->>clockin-service: sleep_session
+deactivate sleeprecord-model
+clockin-service-->>api-controller: JSON {sleep_session}
+deactivate clockin-service
+end
+
+group 1b. End Sleep Session (Clock Out)
+api-controller->clockin-service: end session\nPOST /sleep_sessions/:id/end\n--data:wake_time--
+activate clockin-service
+clockin-service->sleeprecord-model: update(session_id, wake_time)
+activate sleeprecord-model
+sleeprecord-model-->>clockin-service: updated_sleep_session
+deactivate sleeprecord-model
+clockin-service-->>api-controller: JSON {updated_sleep_session}
+deactivate clockin-service
+end
+
+group 2a. Follow User
+api-controller->follow-service: follow user\nPOST /follows\n--data:follower_id,followed_id--
+activate follow-service
+follow-service->follow-model: create(follower_id,followed_id)
+activate follow-model
+follow-model-->>follow-service: follow_record
+deactivate follow-model
+follow-service-->>api-controller: JSON {status:ok}
+deactivate follow-service
+end
+
+group 2b. Unfollow User
+api-controller->follow-service: unfollow user\nDELETE /follows/:id
+activate follow-service
+follow-service->follow-model: destroy(id)
+activate follow-model
+follow-model-->>follow-service: deleted
+deactivate follow-model
+follow-service-->>api-controller: JSON {status:ok}
+deactivate follow-service
+end
+
+group 3. Friends’ Sleep Records
+api-controller->friends-service: get friends sleep records\nGET /friends/sleep_records
+activate friends-service
+friends-service->follow-model: find_all_followed_ids(user_id)
+activate follow-model
+follow-model-->>friends-service: [followed_ids]
+deactivate follow-model
+friends-service->sleeprecord-model: find_all_by_users([followed_ids])\nWHERE created_at IN last_week\nORDER BY (wake_time-sleep_time) DESC
+activate sleeprecord-model
+note right of sleeprecord-model: Sorting by duration handled at DB\n(use index + computed column if needed)
+sleeprecord-model-->>friends-service: [friends_sleep_records]
+deactivate sleeprecord-model
+friends-service-->>api-controller: JSON [friends_sleep_records]
+deactivate friends-service
+end
+```
 
 ### Data Models
 
