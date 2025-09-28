@@ -1,0 +1,98 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/login":
+    post:
+      summary: Logs in a user
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '200':
+          description: login successful
+        '401':
+          description: invalid credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/logout":
+    delete:
+      summary: Logs out a user
+      tags:
+      - Authentication
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      responses:
+        '204':
+          description: logout successful
+  "/sleep_records/clock_in":
+    post:
+      summary: Clock in (start a new sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: clocked in
+        '422':
+          description: already clocked in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+  "/sleep_records/clock_out":
+    post:
+      summary: Clock out (end the current sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: clocked out
+        '422':
+          description: no open sleep session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com
