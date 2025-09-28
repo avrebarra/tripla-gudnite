@@ -13,4 +13,6 @@ Rails.application.routes.draw do
   post "sleep_records/clock_out", to: "sleep_records#clock_out"
   post "login", to: "auth#login"
   delete "logout", to: "auth#logout"
+
+  resources :followings, only: [:create]
 end
