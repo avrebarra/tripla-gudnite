@@ -13,7 +13,7 @@ generate-rswag:
 	bundle exec rails generate rswag:install
 
 test:
-	bundle exec rails test
+	bundle exec rspec
 
 lint:
 	bundle exec rubocop -A
