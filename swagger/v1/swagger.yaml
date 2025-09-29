@@ -1,0 +1,196 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths:
+  "/login":
+    post:
+      summary: Logs in a user
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '200':
+          description: login successful
+        '401':
+          description: invalid credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/logout":
+    delete:
+      summary: Logs out a user
+      tags:
+      - Authentication
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      responses:
+        '204':
+          description: logout successful
+  "/followings":
+    post:
+      summary: Follow another user
+      tags:
+      - Social Connections
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      responses:
+        '201':
+          description: follow successful
+        '404':
+          description: user not found
+        '422':
+          description: invalid follow (self-follow or other validation)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                followed_id:
+                  type: integer
+              required:
+              - followed_id
+    get:
+      summary: List users the authenticated user is following
+      tags:
+      - Social Connections
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      responses:
+        '200':
+          description: empty list if not following anyone
+  "/followings/{id}":
+    delete:
+      summary: Unfollow a user
+      tags:
+      - Social Connections
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer token
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: Following ID
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: unfollow successful
+        '404':
+          description: following not found
+  "/sleep_records/clock_in":
+    post:
+      summary: Clock in (start a new sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: clocked in
+        '422':
+          description: already clocked in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+  "/sleep_records/clock_out":
+    post:
+      summary: Clock out (end the current sleep session)
+      tags:
+      - SleepRecords
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: clocked out
+        '422':
+          description: no open sleep session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              required: []
+  "/friends/sleep_feed":
+    get:
+      summary: Get previous week’s sleep records from followed users, sorted by duration
+      tags:
+      - FriendsSleepFeed
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: returns friends sleep feed with pagination
+        '401':
+          description: unauthorized
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com
