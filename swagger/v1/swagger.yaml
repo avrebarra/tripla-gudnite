@@ -13,8 +13,20 @@ paths:
       responses:
         '200':
           description: login successful
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    token: token_here
         '401':
           description: invalid credentials
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid login
       requestBody:
         content:
           application/json:
@@ -45,6 +57,18 @@ paths:
       responses:
         '204':
           description: logout successful
+          content:
+            application/json:
+              examples:
+                no_content: {}
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
   "/followings":
     post:
       summary: Follow another user

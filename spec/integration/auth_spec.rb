@@ -17,11 +17,17 @@ describe 'Authentication API' do
       response '200', 'login successful' do
         let(:user) { User.create!(name: 'Test', email: 'test@example.com', password: 'password') }
         let(:credentials) { { email: user.email, password: 'password' } }
+        example 'application/json', :success, {
+          token: 'token_here'
+        }
         run_test!
       end
 
       response '401', 'invalid credentials' do
         let(:credentials) { { email: 'wrong@example.com', password: 'wrong' } }
+        example 'application/json', :unauthorized, {
+          error: 'Invalid login'
+        }
         run_test!
       end
     end
@@ -36,6 +42,15 @@ describe 'Authentication API' do
       response '204', 'logout successful' do
         let!(:user) { User.create!(name: 'Test', email: 'test@example.com', password: 'password', token: SecureRandom.hex) }
         let(:Authorization) { "Bearer #{user.token}" }
+        example 'application/json', :no_content, nil
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        let(:Authorization) { 'Bearer invalidtoken' }
+        example 'application/json', :unauthorized, {
+          error: 'Unauthorized'
+        }
         run_test!
       end
     end
