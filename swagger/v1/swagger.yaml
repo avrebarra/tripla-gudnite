@@ -13,8 +13,24 @@ paths:
       responses:
         '200':
           description: login successful
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    token: token_here
+                    user:
+                      id: 1
+                      name: Test
+                      email: test@example.com
         '401':
           description: invalid credentials
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid login
       requestBody:
         content:
           application/json:
@@ -45,6 +61,18 @@ paths:
       responses:
         '204':
           description: logout successful
+          content:
+            application/json:
+              examples:
+                no_content: {}
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
   "/followings":
     post:
       summary: Follow another user
@@ -62,10 +90,34 @@ paths:
       responses:
         '201':
           description: follow successful
+          content:
+            application/json:
+              examples:
+                created:
+                  value:
+                    status: ok
+                    following:
+                      id: 1
+                      follower_id: 1
+                      followed_id: 2
+                      created_at: '2025-09-29T12:00:00Z'
+                      updated_at: '2025-09-29T12:00:00Z'
         '404':
           description: user not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: User not found
         '422':
           description: invalid follow (self-follow or other validation)
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: can't follow yourself
       requestBody:
         content:
           application/json:
@@ -89,9 +141,31 @@ paths:
         description: Bearer token
         schema:
           type: string
+      - name: page
+        in: query
+        required: false
+        description: Page number
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        description: Results per page
+        schema:
+          type: integer
       responses:
         '200':
           description: empty list if not following anyone
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    users: []
+                    meta:
+                      current_page: 1
+                      total_pages: 1
+                      total_count: 0
   "/followings/{id}":
     delete:
       summary: Unfollow a user
@@ -115,8 +189,18 @@ paths:
       responses:
         '204':
           description: unfollow successful
+          content:
+            application/json:
+              examples:
+                no_content: {}
         '404':
           description: following not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: Following not found
   "/sleep_records/clock_in":
     post:
       summary: Clock in (start a new sleep session)
@@ -131,8 +215,29 @@ paths:
       responses:
         '201':
           description: clocked in
+          content:
+            application/json:
+              examples:
+                created:
+                  value:
+                    id: 1
+                    clock_in: '2025-09-29T22:00:00Z'
+                    clock_out: 
+                    duration: 
+                    created_at: '2025-09-29T22:00:00Z'
+                    updated_at: '2025-09-29T22:00:00Z'
+                    user:
+                      id: 1
+                      name: API User
+                      email: apiuser@example.com
         '422':
           description: already clocked in
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: Already clocked in. Please clock out first.
       requestBody:
         content:
           application/json:
@@ -154,8 +259,29 @@ paths:
       responses:
         '200':
           description: clocked out
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    id: 1
+                    clock_in: '2025-09-29T20:00:00Z'
+                    clock_out: '2025-09-29T22:00:00Z'
+                    duration: 7200
+                    created_at: '2025-09-29T20:00:00Z'
+                    updated_at: '2025-09-29T22:00:00Z'
+                    user:
+                      id: 1
+                      name: API User
+                      email: apiuser@example.com
         '422':
           description: no open sleep session
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: No open sleep session to clock out.
       requestBody:
         content:
           application/json:
@@ -187,8 +313,44 @@ paths:
       responses:
         '200':
           description: returns friends sleep feed with pagination
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    sleep_records:
+                    - id: 1
+                      clock_in: '2025-09-27T22:00:00Z'
+                      clock_out: '2025-09-28T06:00:00Z'
+                      duration: 28800
+                      created_at: '2025-09-27T22:00:00Z'
+                      updated_at: '2025-09-28T06:00:00Z'
+                      user:
+                        id: 2
+                        name: Bob
+                        email: bob_api@example.com
+                    - id: 2
+                      clock_in: '2025-09-27T22:00:00Z'
+                      clock_out: '2025-09-28T06:00:00Z'
+                      duration: 28800
+                      created_at: '2025-09-27T22:00:00Z'
+                      updated_at: '2025-09-28T06:00:00Z'
+                      user:
+                        id: 3
+                        name: Charlie
+                        email: charlie_api@example.com
+                    meta:
+                      current_page: 1
+                      total_pages: 1
+                      total_count: 2
         '401':
           description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
 servers:
 - url: https://{defaultHost}
   variables:
