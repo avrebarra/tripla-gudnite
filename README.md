@@ -21,10 +21,11 @@ Gudnite is a social sleep-tracking backend API, designed for easy sleep session 
 	- `make lint` — Auto-correct with Rubocop
 	- `make seed` — Seed the database
 - **Docs & Planning:**
-	- Main planning and technical details: [`docs/DRAFT.md`](docs/DRAFT.md)
-	- All documentation: [`docs/`](docs/)
-- **AI Usage:**
-	- This repo leverages AI for code generation and planning. See commit messages and PR descriptions on GitHub for context and explanations.
+		- Main planning and technical details: [`docs/DRAFT.md`](docs/DRAFT.md)
+		- AI-assisted work recaps: [`docs/ai-work-recaps.md`](docs/ai-work-recaps.md)
+		- All documentation: [`docs/`](docs/)
+		- **AI Usage:**
+			- This repo leverages AI for code generation and planning. See commit messages and PR descriptions on GitHub for context and explanations.
 
 ## Quick Start
 1. Clone the repo and open in VS Code (with Dev Containers enabled)
