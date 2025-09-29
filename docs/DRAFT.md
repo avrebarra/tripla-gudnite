@@ -107,6 +107,8 @@ Each endpoint is designed to be RESTful, stateless, and returns JSON responses. 
 
 #### Unified Sequence Diagram for All Main Flows
 
+![Gudnite System Sequence Diagram](gudnite-sequence-diagram.png)
+
 ```
 participant api-controller
 participant auth-service
@@ -119,7 +121,7 @@ participant follow-model
 
 entryspacing 0.5
 
-group 0. User Auth (Login/Logout)
+group 0a. User Auth (Login)
 api-controller->auth-service: login\nPOST /login\n--data:email,password--
 activate auth-service
 auth-service->user-model: find_by(email)
@@ -139,6 +141,7 @@ end
 deactivate auth-service
 end
 
+group 0b. User Auth (Logout)
 api-controller->auth-service: logout\nDELETE /logout\n--header:Authorization:Bearer token--
 activate auth-service
 auth-service->user-model: find_by(token)
