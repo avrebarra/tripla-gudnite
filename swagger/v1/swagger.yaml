@@ -86,10 +86,34 @@ paths:
       responses:
         '201':
           description: follow successful
+          content:
+            application/json:
+              examples:
+                created:
+                  value:
+                    status: ok
+                    following:
+                      id: 1
+                      follower_id: 1
+                      followed_id: 2
+                      created_at: '2025-09-29T12:00:00Z'
+                      updated_at: '2025-09-29T12:00:00Z'
         '404':
           description: user not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: User not found
         '422':
           description: invalid follow (self-follow or other validation)
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: can't follow yourself
       requestBody:
         content:
           application/json:
@@ -116,6 +140,21 @@ paths:
       responses:
         '200':
           description: empty list if not following anyone
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                  - id: 2
+                    name: Target1
+                    email: target1@example.com
+                    created_at: '2025-09-29T12:00:00Z'
+                    updated_at: '2025-09-29T12:00:00Z'
+                  - id: 3
+                    name: Target2
+                    email: target2@example.com
+                    created_at: '2025-09-29T12:00:00Z'
+                    updated_at: '2025-09-29T12:00:00Z'
   "/followings/{id}":
     delete:
       summary: Unfollow a user
@@ -139,8 +178,18 @@ paths:
       responses:
         '204':
           description: unfollow successful
+          content:
+            application/json:
+              examples:
+                no_content: {}
         '404':
           description: following not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    error: Following not found
   "/sleep_records/clock_in":
     post:
       summary: Clock in (start a new sleep session)

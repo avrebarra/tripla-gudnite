@@ -20,6 +20,16 @@ describe 'Followings API' do
         let!(:target) { User.create!(name: 'Target', email: 'target@example.com', password: 'password') }
         let(:Authorization) { "Bearer #{user.token}" }
         let(:followed_id) { { followed_id: target.id } }
+        example 'application/json', :created, {
+          status: 'ok',
+          following: {
+            id: 1,
+            follower_id: 1,
+            followed_id: 2,
+            created_at: '2025-09-29T12:00:00Z',
+            updated_at: '2025-09-29T12:00:00Z'
+          }
+        }
         run_test!
       end
 
@@ -27,6 +37,9 @@ describe 'Followings API' do
         let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
         let(:Authorization) { "Bearer #{user.token}" }
         let(:followed_id) { { followed_id: 0 } }
+        example 'application/json', :not_found, {
+          error: 'User not found'
+        }
         run_test!
       end
 
@@ -34,6 +47,9 @@ describe 'Followings API' do
         let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
         let(:Authorization) { "Bearer #{user.token}" }
         let(:followed_id) { { followed_id: user.id } }
+        example 'application/json', :unprocessable_entity, {
+          error: "can't follow yourself"
+        }
         run_test!
       end
     end
@@ -53,13 +69,30 @@ describe 'Followings API' do
           user.followings.create!(followed: target2)
         end
         let(:Authorization) { "Bearer #{user.token}" }
+        example 'application/json', :ok, [
+          {
+            id: 2,
+            name: 'Target1',
+            email: 'target1@example.com',
+            created_at: '2025-09-29T12:00:00Z',
+            updated_at: '2025-09-29T12:00:00Z'
+          },
+          {
+            id: 3,
+            name: 'Target2',
+            email: 'target2@example.com',
+            created_at: '2025-09-29T12:00:00Z',
+            updated_at: '2025-09-29T12:00:00Z'
+          }
+        ]
         run_test!
       end
 
       response '200', 'empty list if not following anyone' do
-        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
-        let(:Authorization) { "Bearer #{user.token}" }
-        run_test!
+  let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+  let(:Authorization) { "Bearer #{user.token}" }
+  example 'application/json', :ok, []
+  run_test!
       end
     end
   end
@@ -77,6 +110,7 @@ describe 'Followings API' do
         let!(:following) { user.followings.create!(followed: target) }
         let(:Authorization) { "Bearer #{user.token}" }
         let(:id) { following.id }
+        example 'application/json', :no_content, nil
         run_test!
       end
 
@@ -84,6 +118,9 @@ describe 'Followings API' do
         let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
         let(:Authorization) { "Bearer #{user.token}" }
         let(:id) { 0 }
+        example 'application/json', :not_found, {
+          error: 'Following not found'
+        }
         run_test!
       end
     end
