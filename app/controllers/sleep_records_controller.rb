@@ -21,8 +21,17 @@ class SleepRecordsController < ApplicationController
 
   # GET /friends/sleep_feed (delegates to service)
   def friends_sleep_feed
-    feed = SleepRecordService.friends_sleep_feed(current_user)
-    render json: feed, each_serializer: SleepRecordSerializer, status: :ok
+    page = params[:page] || 1
+    per_page = params[:per_page] || 10
+    feed = SleepRecordService.friends_sleep_feed(current_user).page(page).per(per_page)
+    render json: {
+      sleep_records: ActiveModelSerializers::SerializableResource.new(feed, each_serializer: SleepRecordSerializer),
+      meta: {
+        current_page: feed.current_page,
+        total_pages: feed.total_pages,
+        total_count: feed.total_count
+      }
+    }, status: :ok
   end
 
   private
