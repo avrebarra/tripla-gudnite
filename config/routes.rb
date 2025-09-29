@@ -15,4 +15,5 @@ Rails.application.routes.draw do
   delete "logout", to: "auth#logout"
 
   resources :followings, only: [ :index, :create, :destroy ]
+    get "friends/sleep_feed", to: "sleep_records#friends_sleep_feed"
 end

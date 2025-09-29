@@ -163,6 +163,32 @@ paths:
               type: object
               properties: {}
               required: []
+  "/friends/sleep_feed":
+    get:
+      summary: Get previous week’s sleep records from followed users, sorted by duration
+      tags:
+      - FriendsSleepFeed
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: returns friends sleep feed with pagination
+        '401':
+          description: unauthorized
 servers:
 - url: https://{defaultHost}
   variables:
