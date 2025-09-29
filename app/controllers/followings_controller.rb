@@ -3,9 +3,18 @@ class FollowingsController < ApplicationController
 
   # GET /followings
   def index
+    page = params[:page] || 1
+    per_page = params[:per_page] || 10
     service = UserFollowingService.new(current_user)
-    users = service.list_followings
-    render json: users
+    followings = service.list_followings.page(page).per(per_page)
+    render json: {
+      users: ActiveModelSerializers::SerializableResource.new(followings, each_serializer: UserSerializer),
+      meta: {
+        current_page: followings.current_page,
+        total_pages: followings.total_pages,
+        total_count: followings.total_count
+      }
+    }, status: :ok
   end
 
   # POST /followings

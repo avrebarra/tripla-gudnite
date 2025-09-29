@@ -59,8 +59,10 @@ describe 'Followings API' do
       produces 'application/json'
       security [ bearerAuth: [] ]
       parameter name: :Authorization, in: :header, type: :string, required: true, description: 'Bearer token'
+      parameter name: :page, in: :query, type: :integer, required: false, description: 'Page number'
+      parameter name: :per_page, in: :query, type: :integer, required: false, description: 'Results per page'
 
-      response '200', 'list of followed users' do
+      response '200', 'paginated list of followed users' do
         let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
         let!(:target1) { User.create!(name: 'Target1', email: 'target1@example.com', password: 'password') }
         let!(:target2) { User.create!(name: 'Target2', email: 'target2@example.com', password: 'password') }
@@ -69,30 +71,44 @@ describe 'Followings API' do
           user.followings.create!(followed: target2)
         end
         let(:Authorization) { "Bearer #{user.token}" }
-        example 'application/json', :ok, [
-          {
-            id: 2,
-            name: 'Target1',
-            email: 'target1@example.com',
-            created_at: '2025-09-29T12:00:00Z',
-            updated_at: '2025-09-29T12:00:00Z'
-          },
-          {
-            id: 3,
-            name: 'Target2',
-            email: 'target2@example.com',
-            created_at: '2025-09-29T12:00:00Z',
-            updated_at: '2025-09-29T12:00:00Z'
+        example 'application/json', :ok, {
+          users: [
+            {
+              id: 2,
+              name: 'Target1',
+              email: 'target1@example.com',
+              created_at: '2025-09-29T12:00:00Z',
+              updated_at: '2025-09-29T12:00:00Z'
+            },
+            {
+              id: 3,
+              name: 'Target2',
+              email: 'target2@example.com',
+              created_at: '2025-09-29T12:00:00Z',
+              updated_at: '2025-09-29T12:00:00Z'
+            }
+          ],
+          meta: {
+            current_page: 1,
+            total_pages: 1,
+            total_count: 2
           }
-        ]
+        }
         run_test!
       end
 
       response '200', 'empty list if not following anyone' do
-  let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
-  let(:Authorization) { "Bearer #{user.token}" }
-  example 'application/json', :ok, []
-  run_test!
+        let!(:user) { User.create!(name: 'Follower', email: 'follower@example.com', password: 'password', token: SecureRandom.hex) }
+        let(:Authorization) { "Bearer #{user.token}" }
+        example 'application/json', :ok, {
+          users: [],
+          meta: {
+            current_page: 1,
+            total_pages: 1,
+            total_count: 0
+          }
+        }
+        run_test!
       end
     end
   end

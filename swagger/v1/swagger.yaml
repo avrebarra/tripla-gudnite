@@ -141,6 +141,18 @@ paths:
         description: Bearer token
         schema:
           type: string
+      - name: page
+        in: query
+        required: false
+        description: Page number
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        description: Results per page
+        schema:
+          type: integer
       responses:
         '200':
           description: empty list if not following anyone
@@ -149,16 +161,11 @@ paths:
               examples:
                 ok:
                   value:
-                  - id: 2
-                    name: Target1
-                    email: target1@example.com
-                    created_at: '2025-09-29T12:00:00Z'
-                    updated_at: '2025-09-29T12:00:00Z'
-                  - id: 3
-                    name: Target2
-                    email: target2@example.com
-                    created_at: '2025-09-29T12:00:00Z'
-                    updated_at: '2025-09-29T12:00:00Z'
+                    users: []
+                    meta:
+                      current_page: 1
+                      total_pages: 1
+                      total_count: 0
   "/followings/{id}":
     delete:
       summary: Unfollow a user
