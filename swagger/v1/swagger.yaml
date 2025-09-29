@@ -19,6 +19,10 @@ paths:
                 success:
                   value:
                     token: token_here
+                    user:
+                      id: 1
+                      name: Test
+                      email: test@example.com
         '401':
           description: invalid credentials
           content:

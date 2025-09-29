@@ -6,7 +6,10 @@ class AuthController < ApplicationController
     user = User.find_by(email: params[:email])
     if user&.authenticate(params[:password])
       user.update(token: SecureRandom.hex)
-      render json: { token: user.token }, status: :ok
+      render json: {
+        token: user.token,
+        user: UserSerializer.new(user).as_json
+      }, status: :ok
     else
       render json: { error: "Invalid login" }, status: :unauthorized
     end

@@ -18,7 +18,12 @@ describe 'Authentication API' do
         let(:user) { User.create!(name: 'Test', email: 'test@example.com', password: 'password') }
         let(:credentials) { { email: user.email, password: 'password' } }
         example 'application/json', :success, {
-          token: 'token_here'
+          token: 'token_here',
+          user: {
+            id: 1,
+            name: 'Test',
+            email: 'test@example.com'
+          }
         }
         run_test!
       end
