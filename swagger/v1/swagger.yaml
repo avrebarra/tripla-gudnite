@@ -204,8 +204,29 @@ paths:
       responses:
         '201':
           description: clocked in
+          content:
+            application/json:
+              examples:
+                created:
+                  value:
+                    id: 1
+                    clock_in: '2025-09-29T22:00:00Z'
+                    clock_out: 
+                    duration: 
+                    created_at: '2025-09-29T22:00:00Z'
+                    updated_at: '2025-09-29T22:00:00Z'
+                    user:
+                      id: 1
+                      name: API User
+                      email: apiuser@example.com
         '422':
           description: already clocked in
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: Already clocked in. Please clock out first.
       requestBody:
         content:
           application/json:
@@ -227,8 +248,29 @@ paths:
       responses:
         '200':
           description: clocked out
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    id: 1
+                    clock_in: '2025-09-29T20:00:00Z'
+                    clock_out: '2025-09-29T22:00:00Z'
+                    duration: 7200
+                    created_at: '2025-09-29T20:00:00Z'
+                    updated_at: '2025-09-29T22:00:00Z'
+                    user:
+                      id: 1
+                      name: API User
+                      email: apiuser@example.com
         '422':
           description: no open sleep session
+          content:
+            application/json:
+              examples:
+                unprocessable_entity:
+                  value:
+                    error: No open sleep session to clock out.
       requestBody:
         content:
           application/json:
@@ -260,8 +302,44 @@ paths:
       responses:
         '200':
           description: returns friends sleep feed with pagination
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    sleep_records:
+                    - id: 1
+                      clock_in: '2025-09-27T22:00:00Z'
+                      clock_out: '2025-09-28T06:00:00Z'
+                      duration: 28800
+                      created_at: '2025-09-27T22:00:00Z'
+                      updated_at: '2025-09-28T06:00:00Z'
+                      user:
+                        id: 2
+                        name: Bob
+                        email: bob_api@example.com
+                    - id: 2
+                      clock_in: '2025-09-27T22:00:00Z'
+                      clock_out: '2025-09-28T06:00:00Z'
+                      duration: 28800
+                      created_at: '2025-09-27T22:00:00Z'
+                      updated_at: '2025-09-28T06:00:00Z'
+                      user:
+                        id: 3
+                        name: Charlie
+                        email: charlie_api@example.com
+                    meta:
+                      current_page: 1
+                      total_pages: 1
+                      total_count: 2
         '401':
           description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
 servers:
 - url: https://{defaultHost}
   variables:

@@ -20,6 +20,19 @@ describe 'SleepRecords API', swagger_doc: 'v1/swagger.yaml' do
           # Ensure no open session
           user.sleep_records.where(clock_out: nil).destroy_all
         end
+        example 'application/json', :created, {
+          id: 1,
+          clock_in: '2025-09-29T22:00:00Z',
+          clock_out: nil,
+          duration: nil,
+          created_at: '2025-09-29T22:00:00Z',
+          updated_at: '2025-09-29T22:00:00Z',
+          user: {
+            id: 1,
+            name: 'API User',
+            email: 'apiuser@example.com'
+          }
+        }
         run_test!
       end
 
@@ -27,6 +40,9 @@ describe 'SleepRecords API', swagger_doc: 'v1/swagger.yaml' do
         before do
           user.sleep_records.create!(clock_in: 1.hour.ago)
         end
+        example 'application/json', :unprocessable_entity, {
+          error: 'Already clocked in. Please clock out first.'
+        }
         run_test!
       end
     end
@@ -47,6 +63,19 @@ describe 'SleepRecords API', swagger_doc: 'v1/swagger.yaml' do
         before do
           user.sleep_records.create!(clock_in: 2.hours.ago)
         end
+        example 'application/json', :ok, {
+          id: 1,
+          clock_in: '2025-09-29T20:00:00Z',
+          clock_out: '2025-09-29T22:00:00Z',
+          duration: 7200,
+          created_at: '2025-09-29T20:00:00Z',
+          updated_at: '2025-09-29T22:00:00Z',
+          user: {
+            id: 1,
+            name: 'API User',
+            email: 'apiuser@example.com'
+          }
+        }
         run_test!
       end
 
@@ -54,6 +83,9 @@ describe 'SleepRecords API', swagger_doc: 'v1/swagger.yaml' do
         before do
           user.sleep_records.where(clock_out: nil).destroy_all
         end
+        example 'application/json', :unprocessable_entity, {
+          error: 'No open sleep session to clock out.'
+        }
         run_test!
       end
     end
@@ -72,28 +104,54 @@ describe 'SleepRecords API', swagger_doc: 'v1/swagger.yaml' do
         let(:bob) { User.create!(name: 'Bob', email: 'bob_api@example.com', password: 'password') }
         let(:charlie) { User.create!(name: 'Charlie', email: 'charlie_api@example.com', password: 'password') }
         let(:Authorization) { "Bearer #{alice.token}" }
-
         before do
           Following.create!(follower: alice, followed: bob)
           Following.create!(follower: alice, followed: charlie)
           # Bob and Charlie have sleep records in the last week
-          2.times do |i|
-            clock_in = 2.days.ago - (i+6).hours
-            clock_out = 2.days.ago
-            SleepRecord.create!(user: bob, clock_in: clock_in, clock_out: clock_out, duration: (clock_out-clock_in).to_i)
-            SleepRecord.create!(user: charlie, clock_in: clock_in, clock_out: clock_out, duration: (clock_out-clock_in).to_i)
-          end
         end
-
-        run_test! do |response|
-          data = JSON.parse(response.body)
-          expect(data['sleep_records']).to be_an(Array)
-          expect(data['meta']).to include('current_page', 'total_pages', 'total_count')
-        end
+        example 'application/json', :ok, {
+          sleep_records: [
+            {
+              id: 1,
+              clock_in: '2025-09-27T22:00:00Z',
+              clock_out: '2025-09-28T06:00:00Z',
+              duration: 28800,
+              created_at: '2025-09-27T22:00:00Z',
+              updated_at: '2025-09-28T06:00:00Z',
+              user: {
+                id: 2,
+                name: 'Bob',
+                email: 'bob_api@example.com'
+              }
+            },
+            {
+              id: 2,
+              clock_in: '2025-09-27T22:00:00Z',
+              clock_out: '2025-09-28T06:00:00Z',
+              duration: 28800,
+              created_at: '2025-09-27T22:00:00Z',
+              updated_at: '2025-09-28T06:00:00Z',
+              user: {
+                id: 3,
+                name: 'Charlie',
+                email: 'charlie_api@example.com'
+              }
+            }
+          ],
+          meta: {
+            current_page: 1,
+            total_pages: 1,
+            total_count: 2
+          }
+        }
+        run_test!
       end
 
       response '401', 'unauthorized' do
         let(:Authorization) { nil }
+        example 'application/json', :unauthorized, {
+          error: 'Unauthorized'
+        }
         run_test!
       end
     end
