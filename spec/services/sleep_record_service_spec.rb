@@ -51,4 +51,43 @@ describe SleepRecordService do
       end
     end
   end
+
+  describe '.friends_sleep_feed' do
+    let(:alice) { User.create!(name: 'Alice', email: 'alice@example.com', password: 'password') }
+    let(:bob) { User.create!(name: 'Bob', email: 'bob@example.com', password: 'password') }
+    let(:charlie) { User.create!(name: 'Charlie', email: 'charlie@example.com', password: 'password') }
+
+    before do
+      # Alice follows Bob and Charlie
+      Following.create!(follower: alice, followed: bob)
+      Following.create!(follower: alice, followed: charlie)
+      # Bob and Charlie have sleep records in the last week
+      2.times do |i|
+        clock_in = 2.days.ago - (i+6).hours
+        clock_out = 2.days.ago
+        SleepRecord.create!(user: bob, clock_in: clock_in, clock_out: clock_out, duration: (clock_out-clock_in).to_i)
+        SleepRecord.create!(user: charlie, clock_in: clock_in, clock_out: clock_out, duration: (clock_out-clock_in).to_i)
+      end
+      # Alice has her own sleep record, should not appear in her feed
+      SleepRecord.create!(user: alice, clock_in: 1.day.ago-8.hours, clock_out: 1.day.ago, duration: 8.hours.to_i)
+    end
+
+    it 'returns sleep records from followed users in the last week, sorted by duration desc' do
+      feed = described_class.friends_sleep_feed(alice)
+      expect(feed).to all(be_a(SleepRecord))
+      expect(feed.map(&:user_id)).to all(satisfy { |uid| [ bob.id, charlie.id ].include?(uid) })
+      expect(feed.map(&:user_id)).not_to include(alice.id)
+      # Should be sorted by duration desc
+      durations = feed.map(&:duration)
+      expect(durations).to eq(durations.sort.reverse)
+    end
+
+    it 'does not include records outside the last week' do
+      old_clock_in = 10.days.ago - 8.hours
+      old_clock_out = 10.days.ago
+      SleepRecord.create!(user: bob, clock_in: old_clock_in, clock_out: old_clock_out, duration: 8.hours.to_i)
+      feed = described_class.friends_sleep_feed(alice)
+      expect(feed).not_to include(SleepRecord.find_by(clock_in: old_clock_in))
+    end
+  end
 end
